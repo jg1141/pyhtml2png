@@ -34,7 +34,7 @@ urlnumbers = {}
 urlnumber = 100
 for link in links:
   if link.has_attr('href'):
-     if link['href'].startswith('http:'):
+     if link['href'].startswith('http'):
         urls.append(link['href'])
         urlnumbers[link['href']] = urlnumber
         urlnumber = urlnumber + 1
@@ -46,9 +46,19 @@ print "Fetching website links"
 os.system('rm *.png')
 os.system('rm output/*.png')
 
+savedPath = os.getcwd()
+
 for url in urlset:
+   os.system('mkdir '+`urlnumbers[url]`)
+   os.chdir(os.path.join(savedPath,str(urlnumbers[url])))
    os.system('webkit2png -F '+url)
-   os.system('mv *.png output/'+ `urlnumbers[url]` +'.png')
+   os.system('mv *.png ../output/'+ `urlnumbers[url]` +'.png')
+   os.chdir(savedPath)
+   
+# clean up
+for url in urlset:
+   os.system('rm '+str(urlnumbers[url])+"/*.png")
+   os.system('rmdir '+str(urlnumbers[url]))
 
 dirfiles = os.listdir('output')
 pngs = []
@@ -64,7 +74,8 @@ def imgCrop(im):
     else:
        box = (0, 0, im.size[0], im.size[1])
     region = im.crop(box)
-    region.save("CROPPED" + im.filename)
+    path,filename=os.path.split(im.filename)
+    region.save("CROPPED" + filename)
     
 for png in pngs:
     imgCrop(Image.open(os.path.join(os.getcwd(), 'output/' + png)))
